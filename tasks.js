@@ -7,6 +7,13 @@ import {
 
 let ourTasks = [];
 
+const TASKS = {
+  LOADING: "tasks-loading",
+  LIST: "tasks-list",
+  EMPTY: "tasks-empty",
+  NEW: "tasks-new",
+};
+
 const managePanelVisibility = (panelId, visiblePanelId) => {
   const panel = document.getElementById(panelId);
   if (panelId === visiblePanelId) {
@@ -17,11 +24,10 @@ const managePanelVisibility = (panelId, visiblePanelId) => {
 };
 
 const showPanel = (panelId) => {
-  managePanelVisibility("tasks-loading", panelId);
-  managePanelVisibility("tasks-list", panelId);
-  managePanelVisibility("tasks-empty", panelId);
-  managePanelVisibility("tasks-new", panelId);
-  if (panelId === "tasks-loading" || panelId === "tasks-new") {
+  for(let key in TASKS) {
+    managePanelVisibility(TASKS[key], panelId);
+  }
+  if (panelId === TASKS.LOADING || panelId === TASKS.NEW) {
     document.getElementById("task-new").classList.add("uk-hidden");
   } else {
     document.getElementById("task-new").classList.remove("uk-hidden");
@@ -35,6 +41,7 @@ const checkboxChanged = (isChecked, taskId) => {
       for (let i = 0; i < ourTasks.length; i++) {
         if (ourTasks[i].id === taskId) {
           ourTasks[i] = newTaskState;
+          break;
         }
       }
       refreshOrder();
@@ -54,12 +61,11 @@ const deleteButtonClicked = (taskId) => {
   deleteTask(taskId)
     .then(() => {
       const newOurTasks = [];
-      for (let i = 0; i < ourTasks.length; i++) {
-        const task = ourTasks[i];
-        if (task.id !== taskId) {
+      ourTasks.forEach(task => {
+        if(task.id !== taskId) {
           newOurTasks.push(task);
         }
-      }
+      });
       ourTasks = newOurTasks;
       refreshOrder();
     })
@@ -82,7 +88,7 @@ const renderTask = (task) => {
   title.style.textDecoration = task.isCompleted ? "line-through" : "";
   li.appendChild(title);
   checkbox.addEventListener("change", (evt) =>
-    checkboxChanged(evt.target.checked, task.id, title, checkbox)
+    checkboxChanged(evt.target.checked, task.id)
   );
   const deleteButton = document.createElement("a");
   deleteButton.href = "#";
@@ -122,19 +128,20 @@ const addTask = () => {
 };
 
 export const initTasks = () => {
-  showPanel("tasks-loading");
+  showPanel(TASKS.LOADING);
   getTasks().then((tasks) => {
     ourTasks = tasks;
+    console.debug("ourTasks:");
     console.debug(ourTasks);
     refreshOrder();
     if (tasks.length > 0) {
-      showPanel("tasks-list");
+      showPanel(TASKS.LIST);
     } else {
-      showPanel("tasks-empty");
+      showPanel(TASK.EMPTY);
     }
     document
       .getElementById("task-new")
-      .addEventListener("click", () => showPanel("tasks-new"));
+      .addEventListener("click", () => showPanel(TASKS.NEW));
     document
       .getElementById("task-add")
       .addEventListener("click", addTask);
