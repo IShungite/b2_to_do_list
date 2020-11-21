@@ -142,12 +142,10 @@ const addTask = () => {
     }
   });
 
-  console.log(newList);
-
-    const task = {
-      title: title,
-      list: newList,
-    };
+  const task = {
+    title: title,
+    list: newList,
+  };
 
   createTask(task)
     .then((result) => {
