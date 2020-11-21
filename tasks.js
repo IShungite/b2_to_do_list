@@ -220,7 +220,7 @@ const initLists = () => {
     console.debug("ourLists:");
     console.debug(ourLists);
 
-    if (ourTasks.length > 0) {
+    if (ourLists.length > 0) {
       document.getElementById(CONTAINER.LISTS_LIST).classList.remove("uk-hidden");
       document.getElementById(CONTAINER.LISTS_EMPTY).classList.add("uk-hidden");
     } else {
@@ -229,8 +229,6 @@ const initLists = () => {
     }
 
     ourLists.forEach((list) => renderList(list));
-
-    
 
     document
       .getElementById("list-new")
