@@ -133,16 +133,20 @@ const addTask = () => {
     return false;
   }
 
-  // getList().then((lists) => {
-  //   console.log("allList:")
-  //   console.log(lists);
-  //   const newList = lists[0];
-  //   console.log("new list:")
-  //   console.log(newList);
+  const listName = document.getElementById("task-dropDownList").value;
+  let newList = {};
+  ourLists.forEach(list => {
+    if (list.title===listName)
+    {
+      newList=list;
+    }
+  });
+
+  console.log(newList);
 
     const task = {
       title: title,
-      // list: newList,
+      list: newList,
     };
 
   createTask(task)
@@ -150,7 +154,7 @@ const addTask = () => {
       const newTask = result.data;
       ourTasks.push(newTask);
       refreshOrder();
-      showPanel("tasks-list");
+      showPanel(CONTAINER.TASKS_LIST);
     })
     .catch((err) => {
       alert("Impossible de créer la tâche !");
@@ -184,7 +188,8 @@ const addList = () => {
   }
 
   createList(list).then((result) => {
-    console.debug(result);
+    ourLists.push(result.data);
+    showPanel(CONTAINER.TASKS_EMPTY);
   }).catch((err) => {
     alert("Impossible de créer la liste !");
     console.error("Could not create list!", err);
@@ -237,5 +242,13 @@ const initLists = () => {
     document
       .getElementById("list-add")
       .addEventListener("click", addList);
+
+    const dropdownlist = document.getElementById("task-dropDownList")
+    ourLists.forEach(list => {
+        const option = document.createElement("option");
+        option.setAttribute("value", list.title);
+        option.innerText=list.title;
+        dropdownlist.appendChild(option);
+      });
   })
 }
