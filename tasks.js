@@ -8,12 +8,17 @@ import {
 } from "./api.js";
 
 let ourTasks = [];
+let ourLists = [];
 
-const TASKS = {
+const CONTAINER = {
   LOADING: "tasks-loading",
-  LIST: "tasks-list",
-  EMPTY: "tasks-empty",
-  NEW: "tasks-new",
+  TASKS_LIST: "tasks-list",
+  TASKS_EMPTY: "tasks-empty",
+  NEW_TASK: "tasks-new",
+
+  LISTS_LIST: "lists-list",
+  LISTS_EMPTY: "lists-empty",
+  NEW_LIST: "lists-new",
 };
 
 const managePanelVisibility = (panelId, visiblePanelId) => {
@@ -26,13 +31,20 @@ const managePanelVisibility = (panelId, visiblePanelId) => {
 };
 
 const showPanel = (panelId) => {
-  for(let key in TASKS) {
-    managePanelVisibility(TASKS[key], panelId);
+  for(let key in CONTAINER) {
+    managePanelVisibility(CONTAINER[key], panelId);
   }
-  if (panelId === TASKS.LOADING || panelId === TASKS.NEW) {
-    document.getElementById("task-new").classList.add("uk-hidden");
-  } else {
-    document.getElementById("task-new").classList.remove("uk-hidden");
+
+  switch (panelId){
+    case CONTAINER.LOADING:
+    case CONTAINER.NEW_TASK:
+    case CONTAINER.NEW_LIST:
+      document.getElementById("task-new").classList.add("uk-hidden");
+      document.getElementById("list-new").classList.add("uk-hidden");
+      break;
+    default:
+      document.getElementById("task-new").classList.remove("uk-hidden");
+      document.getElementById("list-new").classList.remove("uk-hidden");
   }
 };
 
@@ -116,33 +128,21 @@ const refreshOrder = () => {
 
 const addTask = () => {
   const title = document.getElementById("task-title").value;
-  const color = document.getElementById("task-color").value;
-  if(!title || !color) {
+  if(!title) {
     alert("Veuillez compléter tous les champs");
     return false;
-  } else if (color.length !== 6) {
-    alert("La couleur doit contenir 6 caractères. Ex: E63946");
-    return false;
   }
-  
-  // const list = {title:"Titre de la liste", color:color};
-  // createList(list).then((result) => {
-  //   console.debug(result);
-  // }).catch((err) => {
-  //   alert("Impossible de créer la liste !");
-  //   console.error("Could not create list!", err);
-  // });
 
-  getList().then((lists) => {
-    console.log("allList:")
-    console.log(lists);
-    const newList = lists[0];
-    console.log("new list:")
-    console.log(newList);
+  // getList().then((lists) => {
+  //   console.log("allList:")
+  //   console.log(lists);
+  //   const newList = lists[0];
+  //   console.log("new list:")
+  //   console.log(newList);
 
     const task = {
       title: title,
-      list: newList,
+      // list: newList,
     };
 
   createTask(task)
@@ -156,30 +156,88 @@ const addTask = () => {
       alert("Impossible de créer la tâche !");
       console.error("Could not create task!", err);
     });
-  });
 };
 
+const renderList = (list) => {
+  const li = document.createElement("li");
+  const title = document.createElement("label");
+  title.innerText = list.title;
+  li.appendChild(title);
+  document.getElementById("lists").appendChild(li);
+};
+
+const addList = () => {
+  const title = document.getElementById("list-title").value;
+  const color = document.getElementById("list-color").value;
+
+  if(!title || !color) {
+    alert("Veuillez compléter tous les champs");
+    return false;
+  } else if (color.length !== 6) {
+    alert("La couleur doit contenir 6 caractères. Ex: E63946");
+    return false;
+  }
+
+  const list = {
+    title: title,
+    color: color
+  }
+
+  createList(list).then((result) => {
+    console.debug(result);
+  }).catch((err) => {
+    alert("Impossible de créer la liste !");
+    console.error("Could not create list!", err);
+  });
+}
+
 export const initTasks = () => {
-  showPanel(TASKS.LOADING);
+  showPanel(CONTAINER.LOADING);
   getTasks().then((tasks) => {
     ourTasks = tasks;
     console.debug("ourTasks:");
     console.debug(ourTasks);
-    console.debug("list")
-    getList().then((lists) => {
-      console.log(lists)
-    });
     refreshOrder();
-    if (tasks.length > 0) {
-      showPanel(TASKS.LIST);
+    if (ourTasks.length > 0) {
+      showPanel(CONTAINER.TASKS_LIST);
     } else {
-      showPanel(TASKS.EMPTY);
+      showPanel(CONTAINER.TASKS_EMPTY);
     }
     document
       .getElementById("task-new")
-      .addEventListener("click", () => showPanel(TASKS.NEW));
+      .addEventListener("click", () => showPanel(CONTAINER.NEW_TASK));
     document
       .getElementById("task-add")
       .addEventListener("click", addTask);
+
+    initLists();
   });
 };
+
+const initLists = () => {
+  getList().then((lists) => {
+    ourLists = lists;
+    console.debug("ourLists:");
+    console.debug(ourLists);
+
+    if (ourTasks.length > 0) {
+      document.getElementById(CONTAINER.LISTS_LIST).classList.remove("uk-hidden");
+      document.getElementById(CONTAINER.LISTS_EMPTY).classList.add("uk-hidden");
+    } else {
+      document.getElementById(CONTAINER.LISTS_LIST).classList.add("uk-hidden");
+      document.getElementById(CONTAINER.LISTS_EMPTY).classList.remove("uk-hidden");
+    }
+
+    ourLists.forEach((list) => renderList(list));
+
+    
+
+    document
+      .getElementById("list-new")
+      .addEventListener("click", () => showPanel(CONTAINER.NEW_LIST));
+
+    document
+      .getElementById("list-add")
+      .addEventListener("click", addList);
+  })
+}
