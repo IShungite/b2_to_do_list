@@ -137,7 +137,7 @@ export const initTasks = () => {
     if (tasks.length > 0) {
       showPanel(TASKS.LIST);
     } else {
-      showPanel(TASK.EMPTY);
+      showPanel(TASKS.EMPTY);
     }
     document
       .getElementById("task-new")
