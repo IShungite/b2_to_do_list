@@ -1,6 +1,6 @@
 const crudfulConfig = {
   headers: {
-    cfAccessKey: "75ca4ddbde8291858f35dfc4b8b75f7b45e40700",
+    cfAccessKey: "41ba3af3de735376992091782edd844578fec330",
   },
 };
 
