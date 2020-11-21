@@ -3,6 +3,8 @@ import {
   deleteTask,
   getTasks,
   setTaskIsCompleted,
+  getList,
+  createList,
 } from "./api.js";
 
 let ourTasks = [];
@@ -114,7 +116,36 @@ const refreshOrder = () => {
 
 const addTask = () => {
   const title = document.getElementById("task-title").value;
-  createTask(title)
+  const color = document.getElementById("task-color").value;
+  if(!title || !color) {
+    alert("Veuillez compléter tous les champs");
+    return false;
+  } else if (color.length !== 6) {
+    alert("La couleur doit contenir 6 caractères. Ex: E63946");
+    return false;
+  }
+  
+  // const list = {title:"Titre de la liste", color:color};
+  // createList(list).then((result) => {
+  //   console.debug(result);
+  // }).catch((err) => {
+  //   alert("Impossible de créer la liste !");
+  //   console.error("Could not create list!", err);
+  // });
+
+  getList().then((lists) => {
+    console.log("allList:")
+    console.log(lists);
+    const newList = lists[0];
+    console.log("new list:")
+    console.log(newList);
+
+    const task = {
+      title: title,
+      list: newList,
+    };
+
+  createTask(task)
     .then((result) => {
       const newTask = result.data;
       ourTasks.push(newTask);
@@ -125,6 +156,7 @@ const addTask = () => {
       alert("Impossible de créer la tâche !");
       console.error("Could not create task!", err);
     });
+  });
 };
 
 export const initTasks = () => {
@@ -133,11 +165,15 @@ export const initTasks = () => {
     ourTasks = tasks;
     console.debug("ourTasks:");
     console.debug(ourTasks);
+    console.debug("list")
+    getList().then((lists) => {
+      console.log(lists)
+    });
     refreshOrder();
     if (tasks.length > 0) {
       showPanel(TASKS.LIST);
     } else {
-      showPanel(TASK.EMPTY);
+      showPanel(TASKS.EMPTY);
     }
     document
       .getElementById("task-new")
