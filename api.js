@@ -4,17 +4,21 @@ const crudfulConfig = {
   },
 };
 
-export const getTasks = () =>
+export const getTasks = (listId) =>
   axios
-    .get("https://todo.crudful.com/tasks", crudfulConfig)
+    .get(`https://todo.crudful.com/tasks?listId=${listId}`, crudfulConfig)
     .then((result) => result.data.results);
 
 export const setTaskIsCompleted = (taskId, isCompleted) =>
-  axios.patch(
-    `https://todo.crudful.com/tasks/${taskId}`,
-    { isCompleted: isCompleted },
-    crudfulConfig
-  );
+  axios
+    .patch(
+      `https://todo.crudful.com/tasks/${taskId}`,
+      {
+        isCompleted: isCompleted,
+      },
+      crudfulConfig
+    )
+    .then((result) => result.data);
 
 export const deleteTask = (taskId) =>
   axios.delete(
@@ -22,21 +26,31 @@ export const deleteTask = (taskId) =>
     crudfulConfig
   );
 
-export const createTask = (task) =>
-  axios.post(
-    "https://todo.crudful.com/tasks",
-    { title: task.title, list: task.list},
-    crudfulConfig
-  );
+export const postTask = (title, listId) =>
+  axios
+    .post(
+      "https://todo.crudful.com/tasks",
+      { title: title, listId: listId },
+      crudfulConfig
+    )
+    .then((result) => result.data);
 
-export const getList = () =>
+export const getLists = () =>
   axios
     .get("https://todo.crudful.com/lists", crudfulConfig)
     .then((result) => result.data.results);
 
-export const createList = (list) =>
-  axios.post(
-    "https://todo.crudful.com/lists",
-    { title: list.title, color: list.color },
+export const deleteList = (listId) =>
+  axios.delete(
+    `https://todo.crudful.com/lists/${listId}`,
     crudfulConfig
   );
+
+export const postList = (title) =>
+  axios
+    .post(
+      "https://todo.crudful.com/lists",
+      { title: title },
+      crudfulConfig
+    )
+    .then((result) => result.data);

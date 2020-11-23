@@ -1,252 +1,142 @@
 import {
-  createTask,
   deleteTask,
   getTasks,
+  postTask,
   setTaskIsCompleted,
-  getList,
-  createList,
 } from "./api.js";
 
 let ourTasks = [];
-let ourLists = [];
-
-const CONTAINER = {
-  LOADING: "tasks-loading",
-  TASKS_LIST: "tasks-list",
-  TASKS_EMPTY: "tasks-empty",
-  NEW_TASK: "tasks-new",
-
-  LISTS_LIST: "lists-list",
-  LISTS_EMPTY: "lists-empty",
-  NEW_LIST: "lists-new",
-};
-
-const managePanelVisibility = (panelId, visiblePanelId) => {
-  const panel = document.getElementById(panelId);
-  if (panelId === visiblePanelId) {
-    panel.classList.remove("uk-hidden");
-  } else {
-    panel.classList.add("uk-hidden");
-  }
-};
+let ourListId = "";
 
 const showPanel = (panelId) => {
-  for(let key in CONTAINER) {
-    managePanelVisibility(CONTAINER[key], panelId);
+  // Hide all panels
+  const panels = document.getElementsByClassName("panel");
+  for (let i = 0; i < panels.length; i++) {
+    panels[i].setAttribute("hidden", "true");
   }
-
-  switch (panelId){
-    case CONTAINER.LOADING:
-    case CONTAINER.NEW_TASK:
-    case CONTAINER.NEW_LIST:
-      document.getElementById("task-new").classList.add("uk-hidden");
-      document.getElementById("list-new").classList.add("uk-hidden");
-      break;
-    default:
-      document.getElementById("task-new").classList.remove("uk-hidden");
-      document.getElementById("list-new").classList.remove("uk-hidden");
+  // Show the panel with panelId
+  document.getElementById(panelId).removeAttribute("hidden");
+  if (panelId === "tasks-loading" || panelId === "tasks-new") {
+    document
+      .getElementById("task-new-link")
+      .setAttribute("hidden", "true");
+  } else {
+    document
+      .getElementById("task-new-link")
+      .removeAttribute("hidden");
   }
 };
 
-const checkboxChanged = (isChecked, taskId) => {
+const setTaskCompletion = (taskId, isChecked) => {
   setTaskIsCompleted(taskId, isChecked)
-    .then((result) => {
-      const newTaskState = result.data;
+    .then((newTaskState) => {
+      // Replace task in ourTasks by its new state
       for (let i = 0; i < ourTasks.length; i++) {
         if (ourTasks[i].id === taskId) {
           ourTasks[i] = newTaskState;
           break;
         }
       }
-      refreshOrder();
+      buildList(ourTasks);
     })
     .catch((err) => {
       console.error(
-        "Something went wrong when setting task is completed",
+        "Something happened when setting task completion",
         err
       );
-      alert("Une erreur est survenue sur le serveur");
-      refreshOrder();
+      alert("Une erreur est survenue côté serveur");
+      buildList(ourTasks);
     });
 };
 
 const deleteButtonClicked = (taskId) => {
-  console.log("Delete task", taskId);
   deleteTask(taskId)
     .then(() => {
-      const newOurTasks = [];
-      ourTasks.forEach(task => {
-        if(task.id !== taskId) {
-          newOurTasks.push(task);
-        }
-      });
-      ourTasks = newOurTasks;
-      refreshOrder();
+      // Delete task from ourTasks
+      ourTasks = ourTasks.filter((task) => task.id !== taskId);
+      buildList(ourTasks);
     })
     .catch((err) => {
-      console.error("Something went wrong when deleting task", err);
-      alert("Une erreur est survenue sur le serveur");
+      console.error("Something happened when deleting a task", err);
+      alert("Une erreur est survenue côté serveur");
     });
 };
 
-const renderTask = (task) => {
+const createTask = (task, ul) => {
   const li = document.createElement("li");
+  li.className = "task-li";
   const checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
   checkbox.id = `checkbox_${task.id}`;
+  checkbox.type = "checkbox";
   checkbox.checked = task.isCompleted;
+  checkbox.addEventListener("change", (evt) =>
+    setTaskCompletion(task.id, evt.target.checked)
+  );
   li.appendChild(checkbox);
   const title = document.createElement("label");
-  title.innerText = task.title;
   title.setAttribute("for", `checkbox_${task.id}`);
-  title.style.textDecoration = task.isCompleted ? "line-through" : "";
+  title.innerText = task.title;
+  if (task.isCompleted) {
+    title.className = "striked";
+  }
   li.appendChild(title);
-  checkbox.addEventListener("change", (evt) =>
-    checkboxChanged(evt.target.checked, task.id)
-  );
   const deleteButton = document.createElement("a");
-  deleteButton.href = "#";
   deleteButton.setAttribute("uk-icon", "trash");
   deleteButton.addEventListener("click", () =>
-    deleteButtonClicked(task.id, li)
+    deleteButtonClicked(task.id)
   );
   li.appendChild(deleteButton);
-  document.getElementById("tasks").appendChild(li);
+  ul.appendChild(li);
 };
 
-const refreshOrder = () => {
-  document.getElementById("tasks").innerText = "";
-  const tasks = ourTasks.sort((a, b) => {
-    if (a.isCompleted && !b.isCompleted) {
-      return 1;
-    } else {
-      return -1;
-    }
-  });
-  tasks.forEach((task) => renderTask(task));
-};
-
-const addTask = () => {
-  const title = document.getElementById("task-title").value;
-  if(!title) {
-    alert("Veuillez compléter tous les champs");
-    return false;
+const buildList = (tasks) => {
+  if (tasks.length === 0) {
+    showPanel("tasks-empty");
+  } else {
+    // Build the list
+    const ul = document.getElementById("tasks-ul");
+    ul.innerText = "";
+    tasks.forEach((task) => createTask(task, ul));
+    showPanel("tasks-list");
   }
+};
 
-  const listName = document.getElementById("task-dropDownList").value;
-  let newList = {};
-  ourLists.forEach(list => {
-    if (list.title===listName)
-    {
-      newList=list;
-    }
-  });
-
-  const task = {
-    title: title,
-    list: newList,
-  };
-
-  createTask(task)
-    .then((result) => {
-      const newTask = result.data;
-      ourTasks.push(newTask);
-      refreshOrder();
-      showPanel(CONTAINER.TASKS_LIST);
+const addNewTask = () => {
+  const title = document.getElementById("task-new-title").value;
+  // Create task
+  postTask(title, ourListId)
+    .then((task) => {
+      // Update ourTasks
+      ourTasks.push(task);
+      buildList(ourTasks);
+      showPanel("tasks-list");
+      document.getElementById("task-new-title").value = "";
     })
     .catch((err) => {
-      alert("Impossible de créer la tâche !");
-      console.error("Could not create task!", err);
+      console.error("Could not create task", err);
+      alert("Une erreur est survenue côté serveur");
     });
 };
 
-const renderList = (list) => {
-  const li = document.createElement("li");
-  const title = document.createElement("label");
-  title.innerText = list.title;
-  li.appendChild(title);
-  document.getElementById("lists").appendChild(li);
-};
-
-const addList = () => {
-  const title = document.getElementById("list-title").value;
-  const color = document.getElementById("list-color").value;
-
-  if(!title || !color) {
-    alert("Veuillez compléter tous les champs");
-    return false;
-  } else if (color.length !== 6) {
-    alert("La couleur doit contenir 6 caractères. Ex: E63946");
-    return false;
-  }
-
-  const list = {
-    title: title,
-    color: color
-  }
-
-  createList(list).then((result) => {
-    ourLists.push(result.data);
-    showPanel(CONTAINER.TASKS_EMPTY);
-  }).catch((err) => {
-    alert("Impossible de créer la liste !");
-    console.error("Could not create list!", err);
-  });
-}
-
-export const initTasks = () => {
-  showPanel(CONTAINER.LOADING);
-  getTasks().then((tasks) => {
+export const refreshAllTasks = (listId) => {
+  showPanel("tasks-loading");
+  ourListId = listId;
+  getTasks(listId).then((tasks) => {
     ourTasks = tasks;
-    console.debug("ourTasks:");
-    console.debug(ourTasks);
-    refreshOrder();
-    if (ourTasks.length > 0) {
-      showPanel(CONTAINER.TASKS_LIST);
-    } else {
-      showPanel(CONTAINER.TASKS_EMPTY);
-    }
-    document
-      .getElementById("task-new")
-      .addEventListener("click", () => showPanel(CONTAINER.NEW_TASK));
-    document
-      .getElementById("task-add")
-      .addEventListener("click", addTask);
-
-    initLists();
+    buildList(tasks);
   });
 };
 
-const initLists = () => {
-  getList().then((lists) => {
-    ourLists = lists;
-    console.debug("ourLists:");
-    console.debug(ourLists);
+const initTasks = () => {
+  document
+    .getElementById("task-new-link")
+    .addEventListener("click", () => showPanel("tasks-new"));
+  document
+    .getElementById("task-new-button")
+    .addEventListener("click", addNewTask);
+  document
+    .getElementById("task-new-cancel")
+    .addEventListener("click", () => showPanel("tasks-list"));
+};
 
-    if (ourLists.length > 0) {
-      document.getElementById(CONTAINER.LISTS_LIST).classList.remove("uk-hidden");
-      document.getElementById(CONTAINER.LISTS_EMPTY).classList.add("uk-hidden");
-    } else {
-      document.getElementById(CONTAINER.LISTS_LIST).classList.add("uk-hidden");
-      document.getElementById(CONTAINER.LISTS_EMPTY).classList.remove("uk-hidden");
-    }
-
-    ourLists.forEach((list) => renderList(list));
-
-    document
-      .getElementById("list-new")
-      .addEventListener("click", () => showPanel(CONTAINER.NEW_LIST));
-
-    document
-      .getElementById("list-add")
-      .addEventListener("click", addList);
-
-    const dropdownlist = document.getElementById("task-dropDownList")
-    ourLists.forEach(list => {
-        const option = document.createElement("option");
-        option.setAttribute("value", list.title);
-        option.innerText=list.title;
-        dropdownlist.appendChild(option);
-      });
-  })
-}
+export default initTasks;

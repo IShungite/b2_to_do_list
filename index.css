@@ -4,43 +4,63 @@ html {
 
 body {
   background-color: #ccc;
-  padding: 0;
   margin: 0;
+  padding: 0;
   height: 100%;
-  color: #555;
 }
 
 .page {
+  background-color: #fff;
+  height: 100%;
   width: 70%;
   margin: auto;
   padding: 64px;
-  background-color: #fff;
-  min-height: 100%;
   box-sizing: border-box;
 }
 
-.tasks-panel {
+.panel {
   display: flex;
-  align-items: center;
   justify-content: center;
-  min-height: 250px;
+  align-items: center;
+  min-height: 300px;
 }
 
-#tasks {
-  width: 90%;
+.panel#tasks-new,
+.panel#lists-new {
+  flex-direction: column;
 }
 
-#tasks li {
+#task-new-title,
+#list-new-title {
+  margin: 16px 0;
+}
+
+#tasks-ul,
+#lists-ul {
+  width: 80%;
+}
+
+.task-li,
+.list-li {
+  width: 100%;
   display: flex;
   align-items: center;
-  margin: 32px 0;
+  padding-right: 32px;
+  box-sizing: border-box;
 }
 
-#tasks label {
+.task-li label,
+.list-tasks-link {
   flex: 1;
-  padding: 0 32px;
 }
 
-#task-title {
-  margin: 0 32px;
+.striked {
+  text-decoration: line-through;
+}
+
+.panel-buttons {
+  width: 250px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
 }
