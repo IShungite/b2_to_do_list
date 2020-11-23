@@ -83,6 +83,17 @@ const createTask = (task, ul) => {
   const details = document.createElement("label");
   details.innerText = task.details;
   li.appendChild(details);
+  const due = document.createElement("label");
+  const dueDate = new Date(task.due)
+  due.innerText = dueDate.toLocaleString();
+  li.appendChild(due);
+  if (new Date().getTime() > dueDate.getTime())
+  {
+    li.style.border= "1px solid red";
+  } else {
+    li.style.border= "1px solid green";
+
+  }
   const deleteButton = document.createElement("a");
   deleteButton.setAttribute("uk-icon", "trash");
   deleteButton.addEventListener("click", () =>
@@ -107,10 +118,13 @@ const buildList = (tasks) => {
 const addNewTask = () => {
   const title = document.getElementById("task-new-title").value;
   const details = document.getElementById("task-new-details").value;
+  const due = document.getElementById("task-new-due").value;
+
 
   const taskData ={
     title: title,
-    details: details
+    details: details,
+    due: new Date(due).toISOString()
   }
 
   // Create task

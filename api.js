@@ -30,7 +30,7 @@ export const postTask = (taskData, listId) =>
   axios
     .post(
       "https://todo.crudful.com/tasks",
-      { title: taskData.title, details: taskData.details, listId: listId },
+      { title: taskData.title, details: taskData.details, due: taskData.due, listId: listId },
       crudfulConfig
     )
     .then((result) => result.data);
