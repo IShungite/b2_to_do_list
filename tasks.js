@@ -3,10 +3,12 @@ import {
   getTasks,
   postTask,
   setTaskIsCompleted,
+  patchTask,
 } from "./api.js";
 
 let ourTasks = [];
 let ourListId = "";
+let ourTaskId = "";
 
 const showPanel = (panelId) => {
   // Hide all panels
@@ -16,7 +18,7 @@ const showPanel = (panelId) => {
   }
   // Show the panel with panelId
   document.getElementById(panelId).removeAttribute("hidden");
-  if (panelId === "tasks-loading" || panelId === "tasks-new") {
+  if (panelId === "tasks-loading" || panelId === "tasks-new" || panelId === "tasks-edit") {
     document
       .getElementById("task-new-link")
       .setAttribute("hidden", "true");
@@ -100,7 +102,19 @@ const createTask = (task, ul) => {
     deleteButtonClicked(task.id)
   );
   li.appendChild(deleteButton);
+  const editButton = document.createElement("a");
+  editButton.setAttribute("uk-icon", "pencil");
+  editButton.addEventListener("click", () => editButtonClicked(task));
+  li.appendChild(editButton);
   ul.appendChild(li);
+};
+
+const editButtonClicked = (task) => {
+  showPanel("tasks-edit");
+  document.getElementById("task-edit-title").value = task.title;
+  document.getElementById("task-edit-details").value = task.details;
+  document.getElementById("task-edit-due").valueAsNumber = new Date(task.due);
+  ourTaskId = task.id;
 };
 
 const buildList = (tasks) => {
@@ -141,6 +155,31 @@ const addNewTask = () => {
       alert("Une erreur est survenue côté serveur");
     });
 };
+const editTask = () => {
+  const title = document.getElementById("task-edit-title").value;
+  const details = document.getElementById("task-edit-details").value;
+  const due = document.getElementById("task-edit-due").value;
+
+  const taskData = {
+    id: ourTaskId,
+    title: title,
+    details: details,
+    due: new Date(due).toISOString()
+  }
+
+  // Create task
+  patchTask(taskData, ourListId)
+    .then(() => {
+      // Update ourTasks
+      refreshAllTasks(ourListId);
+      showPanel("tasks-list");
+      document.getElementById("task-new-title").value = "";
+    })
+    .catch((err) => {
+      console.error("Could not create task", err);
+      alert("Une erreur est survenue côté serveur");
+    });
+};
 
 export const refreshAllTasks = (listId) => {
   showPanel("tasks-loading");
@@ -159,8 +198,11 @@ const initTasks = () => {
     .getElementById("task-new-button")
     .addEventListener("click", addNewTask);
   document
-    .getElementById("task-new-cancel")
+    .getElementById("task-cancel")
     .addEventListener("click", () => showPanel("tasks-list"));
+  document
+    .getElementById("task-edit-button")
+    .addEventListener("click", editTask);
 };
 
 export default initTasks;

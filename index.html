@@ -63,10 +63,7 @@
         <div uk-spinner></div>
       </div>
       <div id="tasks-list" class="panel" hidden>
-        <ul
-          id="tasks-ul"
-          class="uk-list uk-list-large uk-list-divider"
-        >
+        <ul id="tasks-ul"class="uk-list uk-list-large uk-list-divider">
           <li>List item 1</li>
           <li>List item 2</li>
           <li>List item 3</li>
@@ -81,13 +78,21 @@
         <div>Détails: <input id="task-new-details" type="text" placeholder="Détails"/></div>
         <div>Date de fin: <input id="task-new-due" type="datetime-local"/></div>
         <div class="panel-buttons">
-          <button id="task-new-cancel">Annuler</button>
+          <button id="task-cancel">Annuler</button>
           <button id="task-new-button">Ajouter</button>
         </div>
       </div>
-      <a href="javascript:void(0)" id="task-new-link"
-        >+ Nouvelle tâche</a
-      >
+      <div id="tasks-edit" class="panel" hidden>
+        <span>Modifier la tâche</span>
+        <div>Titre: <input id="task-edit-title" type="text" placeholder="Titre"/></div>
+        <div>Détails: <input id="task-edit-details" type="text" placeholder="Détails"/></div>
+        <div>Date de fin: <input id="task-edit-due" type="datetime-local"/></div>
+        <div class="panel-buttons">
+          <button id="task-cancel">Annuler</button>
+          <button id="task-edit-button">Modifier</button>
+        </div>
+      </div>
+      <a href="javascript:void(0)" id="task-new-link">+ Nouvelle tâche</a>
     </div>
   </body>
 </html>

@@ -54,3 +54,12 @@ export const postList = (listData) =>
       crudfulConfig
     )
     .then((result) => result.data);
+
+export const patchTask = (taskData, listId) =>
+  axios
+    .patch(
+      `https://todo.crudful.com/tasks/${taskData.id}`,
+      { title: taskData.title, details: taskData.details, due: taskData.due, listId: listId },
+      crudfulConfig
+    )
+    .then((result) => result.data);
