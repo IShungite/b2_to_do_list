@@ -48,6 +48,9 @@ const createList = (list, ul) => {
     deleteButtonClicked(list.id)
   );
   li.appendChild(deleteButton);
+
+  li.style.border = `1px solid #${list.color}`;
+
   ul.appendChild(li);
 };
 
@@ -65,8 +68,15 @@ const buildList = (lists) => {
 
 const addNewList = () => {
   const title = document.getElementById("list-new-title").value;
-  // Create task
-  postList(title)
+  const color = document.getElementById("list-new-color").value.substr(1);
+
+  const listData ={
+    title: title,
+    color: color,
+  }
+
+  // Create list
+  postList(listData)
     .then((list) => {
       // Update ourLists
       ourLists.push(list);
