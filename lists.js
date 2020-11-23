@@ -1,6 +1,7 @@
-import { deleteList, getLists, postList } from "./api.js";
+import { deleteList, getLists, postList, patchList } from "./api.js";
 
 let ourLists = [];
+let ourlistId = "";
 
 const showPanel = (panelId) => {
   // Hide all panels
@@ -10,7 +11,7 @@ const showPanel = (panelId) => {
   }
   // Show the panel with panelId
   document.getElementById(panelId).removeAttribute("hidden");
-  if (panelId === "lists-loading" || panelId === "lists-new") {
+  if (panelId === "lists-loading" || panelId === "lists-new" || panelId === "lists-edit") {
     document
       .getElementById("list-new-link")
       .setAttribute("hidden", "true");
@@ -51,7 +52,19 @@ const createList = (list, ul) => {
 
   li.style.border = `1px solid #${list.color}`;
 
+  const editButton = document.createElement("a");
+  editButton.setAttribute("uk-icon", "pencil");
+  editButton.addEventListener("click", () => editButtonClicked(list));
+  li.appendChild(editButton);
+
   ul.appendChild(li);
+};
+
+const editButtonClicked = (list) => {
+  ourlistId = list.id;
+  document.getElementById("list-edit-title").value = list.title;
+  document.getElementById("list-edit-color").value = `#${list.color}`;
+  showPanel("lists-edit");
 };
 
 const buildList = (lists) => {
@@ -67,13 +80,7 @@ const buildList = (lists) => {
 };
 
 const addNewList = () => {
-  const title = document.getElementById("list-new-title").value;
-  const color = document.getElementById("list-new-color").value.substr(1);
-
-  const listData ={
-    title: title,
-    color: color,
-  }
+  const listData = getlistData();
 
   // Create list
   postList(listData)
@@ -88,6 +95,32 @@ const addNewList = () => {
       console.error("Could not create list", err);
       alert("Une erreur est survenue côté serveur");
     });
+};
+const editList = () => {
+  const listData = getlistData();
+
+  // Edit list
+  patchList(listData, ourlistId)
+    .then(() => {
+      // Update ourLists
+      refreshAllLists();
+      showPanel("lists-list");
+      document.getElementById("list-new-title").value = "";
+    })
+    .catch((err) => {
+      console.error("Could not create list", err);
+      alert("Une erreur est survenue côté serveur");
+    });
+};
+
+const getlistData = () => {
+  const title = document.getElementById("list-edit-title").value;
+  const color = document.getElementById("list-edit-color").value.substr(1);
+
+  return {
+    title: title,
+    color: color,
+  };
 };
 
 export const refreshAllLists = () => {
@@ -107,6 +140,12 @@ const initLists = () => {
     .addEventListener("click", addNewList);
   document
     .getElementById("list-new-cancel")
+    .addEventListener("click", () => showPanel("lists-list"));
+  document
+    .getElementById("list-edit-button")
+    .addEventListener("click", editList);
+  document
+    .getElementById("list-edit-cancel")
     .addEventListener("click", () => showPanel("lists-list"));
 };
 

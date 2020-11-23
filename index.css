@@ -27,13 +27,15 @@ body {
 
 .panel#tasks-new,
 .panel#tasks-edit,
-.panel#lists-new {
+.panel#lists-new,
+.panel#lists-edit {
   flex-direction: column;
 }
 
 #task-new-title,
 #task-edit-title,
-#list-new-title {
+#list-new-title,
+#list-edit-title {
   margin: 16px 0;
 }
 

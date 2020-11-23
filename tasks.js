@@ -110,11 +110,11 @@ const createTask = (task, ul) => {
 };
 
 const editButtonClicked = (task) => {
-  showPanel("tasks-edit");
+  ourTaskId = task.id;
   document.getElementById("task-edit-title").value = task.title;
   document.getElementById("task-edit-details").value = task.details;
   document.getElementById("task-edit-due").valueAsNumber = new Date(task.due);
-  ourTaskId = task.id;
+  showPanel("tasks-edit");
 };
 
 const buildList = (tasks) => {
@@ -130,16 +130,7 @@ const buildList = (tasks) => {
 };
 
 const addNewTask = () => {
-  const title = document.getElementById("task-new-title").value;
-  const details = document.getElementById("task-new-details").value;
-  const due = document.getElementById("task-new-due").value;
-
-
-  const taskData ={
-    title: title,
-    details: details,
-    due: new Date(due).toISOString()
-  }
+  const taskData = getTaskData();
 
   // Create task
   postTask(taskData, ourListId)
@@ -156,16 +147,7 @@ const addNewTask = () => {
     });
 };
 const editTask = () => {
-  const title = document.getElementById("task-edit-title").value;
-  const details = document.getElementById("task-edit-details").value;
-  const due = document.getElementById("task-edit-due").value;
-
-  const taskData = {
-    id: ourTaskId,
-    title: title,
-    details: details,
-    due: new Date(due).toISOString()
-  }
+  const taskData = getTaskData();
 
   // Create task
   patchTask(taskData, ourListId)
@@ -180,6 +162,19 @@ const editTask = () => {
       alert("Une erreur est survenue côté serveur");
     });
 };
+
+const getTaskData = () => {
+  const title = document.getElementById("task-edit-title").value;
+  const details = document.getElementById("task-edit-details").value;
+  const due = document.getElementById("task-edit-due").value;
+
+  return {
+    id: ourTaskId,
+    title: title,
+    details: details,
+    due: new Date(due).toISOString()
+  };
+}
 
 export const refreshAllTasks = (listId) => {
   showPanel("tasks-loading");
@@ -198,7 +193,10 @@ const initTasks = () => {
     .getElementById("task-new-button")
     .addEventListener("click", addNewTask);
   document
-    .getElementById("task-cancel")
+    .getElementById("task-new-cancel")
+    .addEventListener("click", () => showPanel("tasks-list"));
+  document
+    .getElementById("task-edit-cancel")
     .addEventListener("click", () => showPanel("tasks-list"));
   document
     .getElementById("task-edit-button")
