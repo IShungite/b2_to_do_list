@@ -80,6 +80,9 @@ const createTask = (task, ul) => {
     title.className = "striked";
   }
   li.appendChild(title);
+  const details = document.createElement("label");
+  details.innerText = task.details;
+  li.appendChild(details);
   const deleteButton = document.createElement("a");
   deleteButton.setAttribute("uk-icon", "trash");
   deleteButton.addEventListener("click", () =>
