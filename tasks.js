@@ -103,8 +103,15 @@ const buildList = (tasks) => {
 
 const addNewTask = () => {
   const title = document.getElementById("task-new-title").value;
+  const details = document.getElementById("task-new-details").value;
+
+  const taskData ={
+    title: title,
+    details: details
+  }
+
   // Create task
-  postTask(title, ourListId)
+  postTask(taskData, ourListId)
     .then((task) => {
       // Update ourTasks
       ourTasks.push(task);

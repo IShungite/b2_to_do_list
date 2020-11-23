@@ -26,11 +26,11 @@ export const deleteTask = (taskId) =>
     crudfulConfig
   );
 
-export const postTask = (title, listId) =>
+export const postTask = (taskData, listId) =>
   axios
     .post(
       "https://todo.crudful.com/tasks",
-      { title: title, listId: listId },
+      { title: taskData.title, details: taskData.details, listId: listId },
       crudfulConfig
     )
     .then((result) => result.data);
