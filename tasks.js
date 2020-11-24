@@ -89,13 +89,14 @@ const createTask = (task, ul) => {
   const dueDate = new Date(task.due)
   due.innerText = dueDate.toLocaleString();
   li.appendChild(due);
+  const color = document.createElement("div");
+  color.className = "task-late";
   if (new Date().getTime() > dueDate.getTime())
   {
-    li.style.border= "1px solid red";
-  } else {
-    li.style.border= "1px solid green";
-
+    color.style.backgroundColor= "red";
   }
+  li.prepend(color);
+
   const deleteButton = document.createElement("a");
   deleteButton.setAttribute("uk-icon", "trash");
   deleteButton.addEventListener("click", () =>

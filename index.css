@@ -69,3 +69,8 @@ body {
   justify-content: space-evenly;
   margin-top: 15px;
 }
+
+.task-late {
+  width: 12px;
+  height: 20px;
+}
